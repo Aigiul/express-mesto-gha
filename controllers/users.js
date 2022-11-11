@@ -13,7 +13,7 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUser = (req, res) => {
-  User.findById(req.user._id)
+  User.findById(req.params.userId)
     .orFail(() => {
       throw new NotFoundError();
     })
@@ -24,7 +24,7 @@ module.exports.getUser = (req, res) => {
       if (err.name === 'NotFoundError') {
         res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с указанным _id не найден' });
       } else if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден' });
+        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
@@ -34,10 +34,10 @@ module.exports.getUser = (req, res) => {
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.status(CREATED_CODE).send({ data: user }))
+    .then((user) => res.status(CREATED_CODE).send({ user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя. ' });
+        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
@@ -45,13 +45,12 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.updateUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     {
       name,
       about,
-      avatar,
     },
     {
       new: true,
@@ -65,8 +64,8 @@ module.exports.updateUser = (req, res) => {
     .then((user) => res.send({ user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении пользователя.' });
-      } if (err.name === 'NotFoundError') {
+        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении пользователя' });
+      } else if (err.name === 'NotFoundError') {
         res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
@@ -94,8 +93,8 @@ module.exports.updateAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
-      } if (err.name === 'NotFoundError') {
-        res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
+      } else if (err.name === 'NotFoundError') {
+        res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с указанным _id не найден' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
