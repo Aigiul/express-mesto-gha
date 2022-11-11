@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/Aigiul/express-mesto-gha.git"
   },
-  "author": "",
+  "author": "Aigiul",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Aigiul/express-mesto-gha/issues"
