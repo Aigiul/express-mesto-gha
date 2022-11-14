@@ -1,7 +1,7 @@
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-error');
 const {
-  ERROR_CODE, NOT_FOUND_CODE, CREATED_CODE, INTERNAL_SERVER_ERROR,
+  ERROR_CODE, NOT_FOUND_CODE, INTERNAL_SERVER_ERROR,
 } = require('../errors/status-codes');
 
 module.exports.getUsers = (req, res) => {
@@ -24,7 +24,7 @@ module.exports.getUser = (req, res) => {
       if (err.name === 'NotFoundError') {
         res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с указанным _id не найден' });
       } else if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден' });
       } else {
         res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
@@ -33,14 +33,8 @@ module.exports.getUser = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-  User.create(
-    { name, about, avatar },
-    {
-      new: true,
-      runValidators: true,
-    },
-  )
-    .then((user) => res.status(CREATED_CODE).send({ user }))
+  User.create({ name, about, avatar })
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при создании пользователя' });
@@ -54,10 +48,7 @@ module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    {
-      name,
-      about,
-    },
+    { name, about },
     {
       new: true,
       runValidators: true,
@@ -82,13 +73,10 @@ module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    {
-      avatar,
-    },
+    { avatar },
     {
       new: true,
       runValidators: true,
-      upsert: false,
     },
   )
     .orFail(() => {
