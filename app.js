@@ -24,6 +24,10 @@ app.use('/', require('./routes/users'));
 
 app.use('/', require('./routes/cards'));
 
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Запрашиваемый путь не найден' });
+});
+
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Listening on port ${PORT}`);
