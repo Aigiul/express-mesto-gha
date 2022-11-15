@@ -22,7 +22,7 @@ module.exports.getUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Пользователь с указанным _id не найден' });
+        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при поиске пользователя' });
       } else {
         next(err);
       }
