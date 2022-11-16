@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bodyParser = require('body-parser');
+const { NOT_FOUND_CODE } = require('./errors/status-codes');
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
 app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый путь не найден' });
+  res.status(NOT_FOUND_CODE).send({ message: 'Запрашиваемый путь не найден' });
 });
 
 app.listen(PORT, () => {

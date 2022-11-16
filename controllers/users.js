@@ -23,8 +23,10 @@ module.exports.getUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при поиске пользователя' });
-      } else {
+      } else if (err.name === 'NotFoundError') {
         res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
+      } else {
+        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
     });
 };
