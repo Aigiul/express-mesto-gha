@@ -26,19 +26,17 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
-      throw new NotFoundError();
+      throw new NotFoundError('Карточка с указанным _id не найдена.');
     })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при удалении карточки.' });
-      } else if (err.name === 'NotFoundError') {
-        res.status(NOT_FOUND_CODE).send({ message: 'Карточка с указанным _id не найдена.' });
       } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+        next(err);
       }
     });
 };
