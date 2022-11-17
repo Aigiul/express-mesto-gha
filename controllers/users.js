@@ -12,20 +12,23 @@ module.exports.getUsers = (req, res) => {
     });
 };
 
-module.exports.getUser = (req, res, next) => {
+module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      throw new NotFoundError('Пользователь с указанным _id не найден.');
+      throw new NotFoundError();
     })
     .then((user) => {
       res.send({ user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при поиске пользователя' });
       } else {
-        next(err);
+        res.status(NOT_FOUND_CODE).send({ message: 'Пользователь с указанным _id не найден.' });
       }
+    })
+    .catch(() => {
+      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
