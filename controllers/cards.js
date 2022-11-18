@@ -7,6 +7,7 @@ const {
 
 module.exports.getCards = (req, res) => {
   Card.find({})
+    .populate(['owner', 'likes'])
     .then((card) => res.send({ data: card }))
     .catch(() => {
       res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
@@ -50,6 +51,7 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .populate(['owner', 'likes'])
     .orFail(() => {
       throw new NotFoundError();
     })
