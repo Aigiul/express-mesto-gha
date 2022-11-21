@@ -36,12 +36,11 @@ module.exports.deleteCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при удалении карточки.' });
-      } else {
+      } else if (err.name === 'NotFoundError') {
         res.status(NOT_FOUND_CODE).send({ message: 'Карточка с указанным _id не найдена.' });
+      } else {
+        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
-    })
-    .catch(() => {
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -59,12 +58,11 @@ module.exports.likeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка.' });
-      } else {
+      } else if (err.name === 'NotFoundError') {
         res.status(NOT_FOUND_CODE).send({ message: 'Передан несуществующий _id карточки.' });
+      } else {
+        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
-    })
-    .catch(() => {
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
 
@@ -74,6 +72,7 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .populate(['owner', 'likes'])
     .orFail(() => {
       throw new NotFoundError();
     })
@@ -81,11 +80,10 @@ module.exports.dislikeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные для снятия лайка.' });
-      } else {
+      } else if (err.name === 'NotFoundError') {
         res.status(NOT_FOUND_CODE).send({ message: 'Передан несуществующий _id карточки.' });
+      } else {
+        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
       }
-    })
-    .catch(() => {
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
     });
 };
