@@ -1,50 +1,43 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/not-found-error');
+const BadRequest = require('../errors/badRequest');
+const ForbiddenError = require('../errors/forbiddenError');
 
-const {
-  ERROR_CODE, NOT_FOUND_CODE, INTERNAL_SERVER_ERROR,
-} = require('../errors/status-codes');
-
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((card) => res.send({ data: card }))
-    .catch(() => {
-      res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-    });
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при создании карточки.' });
+        next(new BadRequest('Переданы некорректные данные при создании карточки.'));
       } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+        next(err);
       }
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .orFail(() => {
-      throw new NotFoundError();
+      throw new NotFoundError('Карточка с указанным _id не найдена.');
     })
-    .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные при удалении карточки.' });
-      } else if (err.name === 'NotFoundError') {
-        res.status(NOT_FOUND_CODE).send({ message: 'Карточка с указанным _id не найдена.' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    .then((card) => {
+      if (!req.user._id === req.params.owner) {
+        throw new ForbiddenError('Невозможно удалить карточку');
       }
-    });
+      res.send({ data: card });
+    })
+    .catch(next);
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -52,21 +45,13 @@ module.exports.likeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .orFail(() => {
-      throw new NotFoundError();
+      throw new NotFoundError('Передан несуществующий _id карточки');
     })
     .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные для постановки лайка.' });
-      } else if (err.name === 'NotFoundError') {
-        res.status(NOT_FOUND_CODE).send({ message: 'Передан несуществующий _id карточки.' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -74,16 +59,8 @@ module.exports.dislikeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .orFail(() => {
-      throw new NotFoundError();
+      throw new NotFoundError('Переданы некорректные данные для снятия лайка.');
     })
     .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные для снятия лайка.' });
-      } else if (err.name === 'NotFoundError') {
-        res.status(NOT_FOUND_CODE).send({ message: 'Передан несуществующий _id карточки.' });
-      } else {
-        res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
-      }
-    });
+    .catch(next);
 };

@@ -1,7 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { NOT_FOUND_CODE } = require('./errors/status-codes');
+const { INTERNAL_SERVER_ERROR } = require('./errors/status-codes');
+const { createUser, login } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const { errors } = require('celebrate');
+const NotFoundError = require('./errors/not-found-error');
 
 const app = express();
 
@@ -13,19 +17,29 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect(MONGO_URL);
 
-app.use((req, _res, next) => {
-  req.user = {
-    _id: '636bac683c6b4d64ded06402',
-  };
-  next();
-});
+// роуты не требующие авторизации
+app.post('/signin', login);
+app.post('/signup', createUser);
 
+app.use(auth); // авторизация
+
+//роуты, которым нужна авторизация
 app.use('/', require('./routes/users'));
 
 app.use('/', require('./routes/cards'));
 
-app.use('*', (req, res) => {
-  res.status(NOT_FOUND_CODE).send({ message: 'Запрашиваемый путь не найден' });
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый путь не найден'));
+});
+
+app.use(errors());
+
+app.use((err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else {
+    res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
+  }
 });
 
 app.listen(PORT, () => {

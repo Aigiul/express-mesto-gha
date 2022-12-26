@@ -1,9 +1,10 @@
 {
   "extends": "airbnb-base",
   "rules": {
+    "commonjs": true,
+    "amd": true},
     "no-console":0,
     "no-underscore-dangle": ["error",
     {"allow": ["_id"]}
   ]
-  }
 }
