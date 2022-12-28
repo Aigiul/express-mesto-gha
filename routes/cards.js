@@ -1,12 +1,17 @@
 const router = require('express').Router();
-const { celebrate, joy } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 const {
   getCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
 
 router.get('/cards', getCards);
 
-router.post('/cards', createCard);
+router.post('/cards', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    link: Joi.string().required().regex(/https?:\/\/(\w{3}\.)?[1-9a-z\-.]{1,}\w\w(\/[1-90a-z.,_@%&?+=~/-]{1,}\/?)?#?/i),
+  }),
+}), createCard);
 
 router.delete('/cards/:cardId', celebrate({
   params: Joi.object().keys({

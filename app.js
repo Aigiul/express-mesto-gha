@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const { INTERNAL_SERVER_ERROR } = require('./errors/status-codes');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { errors } = require('celebrate');
+const { errors, Joi, celebrate } = require('celebrate');
 const NotFoundError = require('./errors/not-found-error');
 
 const app = express();
@@ -18,8 +18,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect(MONGO_URL);
 
 // роуты не требующие авторизации
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email({ tlds: { allow: false } }),
+    password: Joi.string().required(),
+  }),
+}), login);
+
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().regex(/https?:\/\/(\w{3}\.)?[1-9a-z\-.]{1,}\w\w(\/[1-90a-z.,_@%&?+=~/-]{1,}\/?)?#?/i),
+    email: Joi.string().required().email({ tlds: { allow: false } }),
+    password: Joi.string().required(),
+  }),
+}), createUser);
 
 app.use(auth); // авторизация
 
