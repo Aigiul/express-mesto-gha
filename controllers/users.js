@@ -45,11 +45,20 @@ module.exports.createUser = (req, res, next) => {
       password: hash, // записываем хэш в базу
     }))
     .then((user) => {
-      res.status(CREATED_CODE).send({ data: user });
+      const userData = {
+        email: user.email,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        _id: user._id,
+      };
+      res.status(CREATED_CODE).send(userData);
     })
     .catch((err) => {
       if (err.code === 11000) {
         next(new ConflictError('Пользователь уже существует'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequest('Переданы некорректные данные при создании пользователя пользователя'));
       } else {
         next(err);
       }
@@ -116,8 +125,5 @@ module.exports.login = (req, res, next) => {
         { expiresIn: '7d' }); // токен будет просрочен через час после создания
       return res.send({ token });
       })
-    .catch((err) => {
-      next(new UnauthorizedError('Необходима авторизация'));
-      next(err);
-    });
+    .catch(next);
 };
