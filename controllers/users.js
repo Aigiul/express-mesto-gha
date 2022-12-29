@@ -5,7 +5,6 @@ const { CREATED_CODE } = require('../errors/status-codes');
 const NotFoundError = require('../errors/not-found-error');
 const BadRequest = require('../errors/badRequest');
 const ConflictError = require('../errors/conflictError');
-const UnauthorizedError = require('../errors/unauthorizedError');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
