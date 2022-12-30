@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const BadRequest = require('../errors/badRequest');
-const UnauthorizedError = require('../errors/unauthorizedError');
+const UnauthorizedError = require('../errors/unauthorizedError')
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
@@ -8,18 +8,21 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     default: 'Жак-Ив кусто',
+    required: false,
     minlength: 2,
     maxlength: 30,
   },
   about: {
     type: String,
     default: 'Исследователь',
+    required: false,
     minlength: 2,
     maxlength: 30,
   },
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    required: false,
     validate: {
       validator(value) {
         return /https?:\/\/(\w{3}\.)?[1-9a-z\-.]{1,}\w\w(\/[1-90a-z.,_@%&?+=~/-]{1,}\/?)?#?/i.test(value);

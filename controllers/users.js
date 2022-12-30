@@ -18,9 +18,15 @@ module.exports.getUser = (req, res, next) => {
     throw new NotFoundError('Пользователь по указанному _id не найден.');
   })
   .then((user) => {
-      res.send(user);
+      res.send({ user });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequest('Пользователь по указанному _id не найден.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.getUserInfo = (req, res, next) => {
@@ -31,7 +37,13 @@ module.exports.getUserInfo = (req, res, next) => {
     .then((user) => {
       res.send({ user });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequest('Пользователь по указанному _id не найден.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -104,7 +116,6 @@ module.exports.updateAvatar = (req, res, next) => {
   })
   .then((user) => res.send({ user }))
   .catch((err) => {
-    console.log(err);
     if (err.name === 'ValidationError') {
       next(new BadRequest('Переданы некорректные данные при обновлении пользователя'));
     } else {
@@ -121,7 +132,7 @@ module.exports.login = (req, res, next) => {
       const token = jwt.sign(
         { _id: user._id },
         'some-secret-key',
-        { expiresIn: '7d' }); // токен будет просрочен через час после создания
+        { expiresIn: '7d' }); // токен будет просрочен через 7 дней после создания
       return res.send({ token });
       })
     .catch(next);
