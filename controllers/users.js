@@ -133,7 +133,11 @@ module.exports.login = (req, res, next) => {
         { _id: user._id },
         'some-secret-key',
         { expiresIn: '7d' }); // токен будет просрочен через 7 дней после создания
-      return res.send({ token });
-      })
+      return res.cookie( 'jwt', token, {
+        // token - наш JWT токен, который мы отправляем
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true
+      });
+    })
     .catch(next);
 };
