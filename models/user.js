@@ -8,16 +8,16 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     default: 'Жак-Ив кусто',
-    required: false,
     minlength: 2,
     maxlength: 30,
+    required: false,
   },
   about: {
     type: String,
     default: 'Исследователь',
-    required: false,
     minlength: 2,
     maxlength: 30,
+    required: false,
   },
   avatar: {
     type: String,
@@ -49,8 +49,7 @@ const userSchema = new mongoose.Schema({
   versionKey: false, // отключение версионирования в монгузе ("__v": 0)
 });
 
-userSchema.statics.findUserByCredentials = function
-findOne(email, password) {
+userSchema.statics.findUserByCredentials = function findOne(email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {

@@ -7,9 +7,9 @@ const auth = require('./middlewares/auth');
 const { errors, Joi, celebrate } = require('celebrate');
 const NotFoundError = require('./errors/not-found-error');
 
-const app = express();
-
 const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
+
+const app = express();
 
 app.use(bodyParser.json());
 
@@ -54,6 +54,7 @@ app.use((err, req, res, next) => {
   } else {
     res.status(INTERNAL_SERVER_ERROR).send({ message: 'Произошла ошибка' });
   }
+  next();
 });
 
 app.listen(PORT, () => {
