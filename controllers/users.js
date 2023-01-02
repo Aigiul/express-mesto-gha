@@ -14,10 +14,10 @@ module.exports.getUsers = (req, res, next) => {
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
-  .orFail(() => {
-    throw new NotFoundError('Пользователь по указанному _id не найден.');
-  })
-  .then((user) => {
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному _id не найден.');
+    })
+    .then((user) => {
       res.send({ user });
     })
     .catch((err) => {
@@ -98,7 +98,7 @@ module.exports.updateUser = (req, res, next) => {
         next(err);
       }
     });
-  };
+};
 
 module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
@@ -111,17 +111,17 @@ module.exports.updateAvatar = (req, res, next) => {
       upsert: false,
     },
   )
-  .orFail(() => {
-    throw new NotFoundError('Пользователь по указанному _id не найден.');
-  })
-  .then((user) => res.send({ user }))
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некорректные данные при обновлении пользователя'));
-    } else {
-      next(err);
-    }
-  });
+    .orFail(() => {
+      throw new NotFoundError('Пользователь по указанному _id не найден.');
+    })
+    .then((user) => res.send({ user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Переданы некорректные данные при обновлении пользователя'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -131,8 +131,9 @@ module.exports.login = (req, res, next) => {
       const token = jwt.sign(
         { _id: user._id },
         'some-secret-key',
-        { expiresIn: '7d' }); // токен будет просрочен через 7 после создания
+        { expiresIn: '7d' },
+      ); // токен будет просрочен через 7 после создания
       return res.send({ token });
-      })
+    })
     .catch(next);
 };

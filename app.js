@@ -1,10 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors, Joi, celebrate } = require('celebrate');
 const { INTERNAL_SERVER_ERROR } = require('./errors/status-codes');
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const { errors, Joi, celebrate } = require('celebrate');
 const NotFoundError = require('./errors/not-found-error');
 
 const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
@@ -37,7 +37,7 @@ app.post('/signup', celebrate({
 
 app.use(auth); // авторизация
 
-//роуты, которым нужна авторизация
+// роуты, которым нужна авторизация
 app.use('/', require('./routes/users'));
 
 app.use('/', require('./routes/cards'));
@@ -58,5 +58,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`Listening on port ${PORT}`);
 });
