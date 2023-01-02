@@ -22,7 +22,7 @@ module.exports.getUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequest('Пользователь по указанному _id не найден.'));
+        next(new BadRequest('Переданы некорректные данные.'));
       } else {
         next(err);
       }
@@ -39,7 +39,7 @@ module.exports.getUserInfo = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequest('Пользователь по указанному _id не найден.'));
+        next(new BadRequest('Переданы некорректные данные.'));
       } else {
         next(err);
       }
